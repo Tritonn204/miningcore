@@ -170,6 +170,10 @@ public class AutofacModule : Module
             .Keyed<IPayoutScheme>(PayoutScheme.PPS)
             .SingleInstance();
 
+        builder.RegisterType<FPPSPaymentScheme>()
+            .Keyed<IPayoutScheme>(PayoutScheme.FPPS)
+            .SingleInstance();
+
         builder.RegisterType<SOLOPaymentScheme>()
             .Keyed<IPayoutScheme>(PayoutScheme.SOLO)
             .SingleInstance();

@@ -874,6 +874,7 @@ public enum PayoutScheme
     PPS = 4,
     PPBS = 5,
     PPLNSBF = 6,
+    FPPS = 7,
 }
 
 public partial class ClusterLoggingConfig
