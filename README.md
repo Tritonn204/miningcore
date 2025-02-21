@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/nbvaa55gu3icd1q8?svg=true)](https://ci.appveyor.com/project/oliverw/miningcore)
+[![Build status](https://ci.appveyor.com/api/projects/status/nbvaa55gu3icd1q8?svg=true)](https://ci.appveyor.com/project/blackmennewstyle/miningcore)
 [![.NET](https://github.com/blackmennewstyle/miningcore/actions/workflows/dotnet.yml/badge.svg)](https://github.com/blackmennewstyle/miningcore/actions/workflows/dotnet.yml)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)]()
 
@@ -139,7 +139,22 @@ Running and developing Miningcore on Windows is of course supported.
 
 ### Database setup
 
-Miningcore currently requires PostgreSQL 10 or higher.
+Miningcore currently requires PostgreSQL 10 or higher. (version 15.3+ is best)
+
+```console
+# Create the file repository configuration:
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+
+# Import the repository signing key:
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+# Update the package lists:
+sudo apt-get update
+
+# Install the latest version of PostgreSQL.
+# If you want a specific version, use 'postgresql-14' or similar instead of 'postgresql':
+sudo apt-get -y install postgresql-14
+```
 
 Run Postgres's `psql` tool:
 
@@ -176,6 +191,11 @@ After executing the command, your `shares` table is now a [list-partitioned tabl
 
 The following step needs to performed **once for every new pool** you add to your cluster. Be sure to **replace all occurences** of `mypool1` in the statement below with the id of your pool from your Miningcore configuration file:
 
+```console
+sudo -u postgres -i
+psql -d miningcore
+```
+
 ```sql
 CREATE TABLE shares_mypool1 PARTITION OF shares FOR VALUES IN ('mypool1');
 ```
@@ -190,7 +210,7 @@ Create a configuration file `config.json` as described [here](https://github.com
 
 ```console
 cd build
-Miningcore -c config.json
+dotnet Miningcore.dll -c config.json
 ```
 
 ## Supported Currencies
@@ -221,11 +241,53 @@ Refer to [this file](https://github.com/blackmennewstyle/miningcore/blob/master/
 
 Miningcore comes with an integrated REST API. Please refer to this page for instructions: https://github.com/oliverw/miningcore/wiki/API
 
+### Serving API using nginx
+
+Create an upstream for API:
+
+    upstream api {
+        server 127.0.0.1:4000;
+    }
+
+and add this setting after <code>location /</code>:
+
+    location /api {
+        proxy_pass http://api;
+    }
+
 ## Running a production pool
 
 A public production pool requires a web-frontend for your users to check their hashrate, earnings etc. Miningcore does not include such frontend but there are several community projects that can be used as starting point.
 
 Once again, do not run a production pool on Windows! This is not a supported configuration.
+
+## Share Relay note
+
+Miningcore supports running multiple pool stratums in different regions. Payments, persistence, and API can be served by a single instance (master). Additional pools (relays) can be connected with ShareRelay.
+
+* Relay node (remove persistence/disable payouts)
+```
+"shareRelay": {
+  "connect": true,
+  "publishUrl": "tcp://0.0.0.0:6000",
+  "sharedEncryptionKey": "foobar"
+}
+```
+
+* Master (run everything)
+```
+"shareRelays": [{
+    "url": "tcp://relay1ip:6000",
+    "sharedEncryptionKey": "foobar"
+}],
+```
+
+**More Info**
+* https://github.com/oliverw/miningcore/blob/master/src/Miningcore/Configuration/ClusterConfig.cs#L586
+* https://github.com/oliverw/miningcore/blob/master/src/Miningcore/Configuration/ClusterConfig.cs#L595
+* https://github.com/oliverw/miningcore/blob/master/src/Miningcore/Configuration/ClusterConfig.cs#L605
+* https://github.com/oliverw/miningcore/issues/409#issuecomment-426335307
+* https://github.com/oliverw/miningcore/issues/1612
 
 ## Donations
 
