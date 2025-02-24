@@ -283,6 +283,7 @@ Miningcore supports running multiple pool stratums in different regions. Payment
 ```
 
 **More Info**
+* https://github.com/oliverw/miningcore/issues/245
 * https://github.com/oliverw/miningcore/blob/master/src/Miningcore/Configuration/ClusterConfig.cs#L586
 * https://github.com/oliverw/miningcore/blob/master/src/Miningcore/Configuration/ClusterConfig.cs#L595
 * https://github.com/oliverw/miningcore/blob/master/src/Miningcore/Configuration/ClusterConfig.cs#L605
