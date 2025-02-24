@@ -265,6 +265,11 @@ Once again, do not run a production pool on Windows! This is not a supported con
 
 Miningcore supports running multiple pool stratums in different regions. Payments, persistence, and API can be served by a single instance (master). Additional pools (relays) can be connected with ShareRelay.
 
+Dependency
+```
+sudo apt-get install libzmq3-dev
+```
+
 * Relay node (remove persistence/disable payouts)
 ```
 "shareRelay": {
@@ -280,6 +285,15 @@ Miningcore supports running multiple pool stratums in different regions. Payment
     "url": "tcp://relay1ip:6000",
     "sharedEncryptionKey": "foobar"
 }],
+```
+
+To enable internal stratum on master:
+```
+"id": "btc",
+"enabled": true,
+"coin": "bitcoin",
+"enableInternalStratum": true,
+"address": "BVc1LxLv61q4X5aYqXTbR2e9mueDtt8fnm",
 ```
 
 **More Info**
