@@ -23,19 +23,23 @@ public class FPPSPaymentScheme : IPayoutScheme
     public FPPSPaymentScheme(
         IConnectionFactory cf,
         IShareRepository shareRepo,
-        IBalanceRepository balanceRepo)
+        IBalanceRepository balanceRepo,
+        IBlockRepository blockRepo) // Added blockRepo injection
     {
         Contract.RequiresNonNull(cf);
         Contract.RequiresNonNull(shareRepo);
         Contract.RequiresNonNull(balanceRepo);
+        Contract.RequiresNonNull(blockRepo);
 
         this.cf = cf;
         this.shareRepo = shareRepo;
         this.balanceRepo = balanceRepo;
+        this.blockRepo = blockRepo; // Assign injected block repository
 
         BuildFaultHandlingPolicy();
     }
 
+    private readonly IBlockRepository blockRepo; // Newly injected block repository
     private readonly IBalanceRepository balanceRepo;
     private readonly IConnectionFactory cf;
     private readonly IShareRepository shareRepo;
@@ -92,6 +96,7 @@ public class FPPSPaymentScheme : IPayoutScheme
 
     private async Task<(decimal blockReward, decimal txFees)> GetAverageRewardsAsync(IDbConnection con, string poolId, CancellationToken ct)
     {
+        // Now using the injected blockRepo to fetch the last 10 blocks.
         var blocks = await cf.Run(con => blockRepo.GetLastBlocksAsync(con, poolId, 10, ct));
 
         if (blocks == null || blocks.Length == 0)
@@ -99,7 +104,7 @@ public class FPPSPaymentScheme : IPayoutScheme
 
         var totalBlockReward = blocks.Sum(b => b.Reward);
         var totalTxFees = blocks.Sum(b => b.RewardFees ?? 0m);
-        
+
         return (totalBlockReward / blocks.Length, totalTxFees / blocks.Length);
     }
 
